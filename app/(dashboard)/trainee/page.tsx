@@ -16,7 +16,7 @@ export default async function TraineeOverviewPage() {
   const { data: progress } = await supabase
     .from('trainee_material_progress')
     .select('status, percentage, latest_score, training_materials:material_id (title)')
-    .eq('trainee_id', teacher?.id ?? '');
+    .eq('trainee_id', (teacher as any)?.id ?? '');
 
   return (
     <div className="space-y-6">
@@ -37,7 +37,7 @@ export default async function TraineeOverviewPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {(progress ?? []).map((p, i) => (
+          {((progress as any[]) ?? []).map((p, i) => (
             <TableRow key={i}>
               <TableCell>{(p as unknown as { training_materials?: { title?: string } }).training_materials?.title}</TableCell>
               <TableCell>

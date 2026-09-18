@@ -14,7 +14,7 @@ export default async function TrainerOverviewPage() {
     .eq('profile_id', profile.id)
     .single();
 
-  const trainerId = trainer?.id;
+  const trainerId = (trainer as any)?.id ?? '';
 
   const [today, upcoming, overdue, pendingVerification, pendingFollowups] = await Promise.all([
     supabase
@@ -69,7 +69,7 @@ export default async function TrainerOverviewPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(today.data ?? []).map((s) => (
+            {((today.data as any[]) ?? []).map((s) => (
               <TableRow key={s.id}>
                 <TableCell>{s.planned_date}</TableCell>
                 <TableCell>

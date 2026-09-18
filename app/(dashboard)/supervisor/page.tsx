@@ -48,7 +48,7 @@ export default async function SupervisorOverviewPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(attention.data ?? []).map((t: { trainee_id: string; employee_code: string | null }) => (
+            {((attention.data as any[]) ?? []).map((t: { trainee_id: string; employee_code: string | null }) => (
               <TableRow key={t.trainee_id}>
                 <TableCell>{t.employee_code ?? t.trainee_id}</TableCell>
                 <TableCell>

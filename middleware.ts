@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
       .single();
 
     const allowed = ROLE_ROUTES[matchedPrefix];
-    if (!profile || !profile.is_active || !allowed.includes(profile.role)) {
+    if (!profile || !profile.is_active || !allowed?.includes(profile.role)) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
       return NextResponse.redirect(url);
