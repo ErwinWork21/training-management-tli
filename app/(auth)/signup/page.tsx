@@ -17,6 +17,7 @@ function SignupForm() {
   const [role, setRole] = useState('trainee');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,8 +56,21 @@ function SignupForm() {
       return;
     }
 
-    router.replace('/login');
-    router.refresh();
+    setSuccess(true);
+  }
+
+  if (success) {
+    return (
+      <div className="space-y-4 text-center">
+        <div className="p-4 bg-green-50 text-green-700 rounded-md">
+          <p className="font-medium">Registration successful!</p>
+          <p className="text-sm mt-1">Your account has been created.</p>
+        </div>
+        <Button className="w-full" asChild>
+          <Link href="/login">Go to login</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (

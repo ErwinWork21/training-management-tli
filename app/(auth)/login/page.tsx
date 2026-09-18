@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,9 +82,9 @@ export default function LoginPage() {
           </Suspense>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
-            <a href="/signup" className="underline hover:text-primary">
+            <Link href="/signup" className="underline hover:text-primary">
               Sign up
-            </a>
+            </Link>
           </div>
         </CardContent>
       </Card>
