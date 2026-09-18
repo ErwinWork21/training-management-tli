@@ -79,6 +79,12 @@ export default function LoginPage() {
           <Suspense fallback={<div className="text-sm text-muted-foreground">Loading form...</div>}>
             <LoginForm />
           </Suspense>
+          <div className="mt-4 text-center text-sm">
+            Don't have an account?{' '}
+            <a href="/signup" className="underline hover:text-primary">
+              Sign up
+            </a>
+          </div>
         </CardContent>
       </Card>
     </main>
