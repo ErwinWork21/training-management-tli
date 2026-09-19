@@ -47,7 +47,6 @@ export default async function SupervisorTraineesPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Current Level</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,16 +63,11 @@ export default async function SupervisorTraineesPage() {
                       {t.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/supervisor/trainees/${t.id}`}>View Details</Link>
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))}
               {(!trainees || trainees.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                     No trainees found.
                   </TableCell>
                 </TableRow>

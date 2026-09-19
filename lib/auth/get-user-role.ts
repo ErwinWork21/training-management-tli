@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { UserRole } from '@/lib/types/database.types';
+import { cookies } from 'next/headers';
 
 export type CurrentProfile = {
   id: string;
@@ -7,6 +8,8 @@ export type CurrentProfile = {
   full_name: string;
   role: UserRole;
   is_active: boolean;
+  originalRole?: UserRole;
+  isPreview?: boolean;
 };
 
 /**
@@ -32,7 +35,29 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
 
   if (error || !profile) return null;
 
-  return profile as CurrentProfile;
+  const realProfile = profile as CurrentProfile;
+
+  if (realProfile.role === 'admin') {
+    const cookieStore = await cookies();
+    const viewAsCookie = cookieStore.get('view_as');
+    
+    if (viewAsCookie?.value) {
+      try {
+        const viewAs = JSON.parse(viewAsCookie.value);
+        return {
+          ...realProfile,
+          id: viewAs.profileId || realProfile.id,
+          role: viewAs.role || realProfile.role,
+          originalRole: 'admin',
+          isPreview: true,
+        };
+      } catch (e) {
+        // ignore malformed cookie
+      }
+    }
+  }
+
+  return realProfile;
 }
 
 /**

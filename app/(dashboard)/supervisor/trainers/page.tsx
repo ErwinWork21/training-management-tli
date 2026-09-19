@@ -59,7 +59,6 @@ export default async function SupervisorTrainersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Active Trainees</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -76,16 +75,11 @@ export default async function SupervisorTrainersPage() {
                       {t.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/supervisor/trainers/${t.id}`}>View Details</Link>
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))}
               {(!trainers || trainers.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-6">
                     No trainers found.
                   </TableCell>
                 </TableRow>

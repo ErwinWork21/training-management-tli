@@ -51,7 +51,7 @@ export default async function TrainerOverviewPage() {
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Trainer Overview</h1>
           <Button asChild>
-            <Link href="/trainer/trainees/new">Register Trainee</Link>
+            <Link href="/trainer/sessions/new">Plan New Session</Link>
           </Button>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
