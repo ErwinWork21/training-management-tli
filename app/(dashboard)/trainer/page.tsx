@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default async function TrainerOverviewPage() {
   const profile = await requireRole(['trainer', 'admin']);
@@ -46,7 +48,12 @@ export default async function TrainerOverviewPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-4 text-xl font-semibold">Trainer Overview</h1>
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Trainer Overview</h1>
+          <Button asChild>
+            <Link href="/trainer/trainees/new">Register Trainee</Link>
+          </Button>
+        </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
           {stats.map((s) => (
             <Card key={s.label}>
