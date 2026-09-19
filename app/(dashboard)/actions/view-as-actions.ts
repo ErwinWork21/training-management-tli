@@ -1,13 +1,14 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { requireRole } from '@/lib/auth/get-user-role';
+import { getCurrentProfile } from '@/lib/auth/get-user-role';
 import { createClient } from '@/lib/supabase/server';
 import { UserRole } from '@/lib/types/database.types';
 
 export async function setViewAsCookie(role: UserRole | null, profileId: string | null) {
   // Only real admins should be able to trigger this
-  const profile = await requireRole(['admin']);
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error('UNAUTHENTICATED');
   // If they are currently previewing, their profile.originalRole will be 'admin'
   if (profile.role !== 'admin' && profile.originalRole !== 'admin') {
     throw new Error('UNAUTHORIZED');
@@ -33,7 +34,8 @@ export async function setViewAsCookie(role: UserRole | null, profileId: string |
 }
 
 export async function fetchUsersForRole(role: UserRole) {
-  const profile = await requireRole(['admin']);
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error('UNAUTHENTICATED');
   if (profile.role !== 'admin' && profile.originalRole !== 'admin') {
     throw new Error('UNAUTHORIZED');
   }
