@@ -19,8 +19,7 @@ export async function createSessionPlan(formData: FormData) {
   }
 
   // Insert into training_plans
-  const { data: plan, error: planError } = await supabase
-    .from('training_plans')
+  const { data: plan, error: planError } = await (supabase.from('training_plans') as any)
     .insert({
       trainer_id: trainerId,
       trainee_id: traineeId,
@@ -37,10 +36,9 @@ export async function createSessionPlan(formData: FormData) {
   }
 
   // Insert into training_sessions
-  const { error: sessionError } = await supabase
-    .from('training_sessions')
+  const { error: sessionError } = await (supabase.from('training_sessions') as any)
     .insert({
-      training_plan_id: plan.id,
+      training_plan_id: (plan as any).id,
       trainer_id: trainerId,
       trainee_id: traineeId,
       material_id: materialId,

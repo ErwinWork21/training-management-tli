@@ -16,18 +16,16 @@ export async function createAssignment(formData: FormData) {
   }
 
   // 1. Mark existing active assignments for this trainee as ended
-  await supabase
-    .from('trainer_trainee_assignments')
+  await (supabase.from('trainer_trainee_assignments') as any)
     .update({ 
-      status: 'COMPLETED', 
+      status: 'ENDED', 
       end_date: new Date().toISOString().slice(0, 10) 
     })
     .eq('trainee_id', traineeId)
     .eq('status', 'ACTIVE');
 
   // 2. Insert new assignment
-  const { error } = await supabase
-    .from('trainer_trainee_assignments')
+  const { error } = await (supabase.from('trainer_trainee_assignments') as any)
     .insert({
       trainer_id: trainerId,
       trainee_id: traineeId,

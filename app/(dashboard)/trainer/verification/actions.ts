@@ -18,8 +18,7 @@ export async function submitVerification(formData: FormData) {
     return { error: 'Missing required fields' };
   }
 
-  const { error } = await supabase
-    .from('verification_records')
+  const { error } = await (supabase.from('verification_records') as any)
     .insert({
       trainee_id: traineeId,
       material_id: materialId,
