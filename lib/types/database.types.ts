@@ -1,40 +1,36 @@
 // ============================================================================
-// Hand-authored types matching supabase/migrations/*.sql.
-//
-// Once the project is linked to a real Supabase project, prefer generating
-// this file instead:
-//   npx supabase gen types typescript --project-id <id> > lib/types/database.types.ts
-// Keep this file as the fallback / reference until that's wired up in CI.
+// Clean baseline database types matching supabase/migrations/00001 - 00011
 // ============================================================================
 
 export type UserRole = 'admin' | 'trainer' | 'supervisor' | 'trainee';
-export type RequirementType = 'OBSERVATION' | 'COMPETENCY_ASSESSMENT' | 'QUIZ';
-export type MaterialStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'VERIFIED' | 'NEEDS_REVIEW';
-export type AssignmentStatus = 'ACTIVE' | 'ENDED' | 'TRANSFERRED';
-export type SessionStatus = 'PLANNED' | 'SCHEDULED' | 'COMPLETED' | 'RESCHEDULED' | 'CANCELLED' | 'MISSED';
+export type TraineeStatus = 'active' | 'inactive' | 'graduated';
+export type RequirementType = 'observation' | 'competency_assessment' | 'quiz';
+export type MaterialStatus = 'not_started' | 'in_progress' | 'completed' | 'verified' | 'needs_review';
+export type AssignmentStatus = 'active' | 'ended' | 'transferred';
+export type SessionStatus = 'planned' | 'completed' | 'rescheduled' | 'cancelled' | 'missed';
 export type DelayReason =
-  | 'TRAINEE_UNAVAILABLE'
-  | 'TRAINER_UNAVAILABLE'
-  | 'SCHEDULE_CHANGED'
-  | 'MATERIAL_ISSUE'
-  | 'OPERATIONAL_ISSUE'
-  | 'OTHER';
-export type ObservationStatus = 'DRAFT' | 'SUBMITTED';
-export type VerificationStatus = 'VERIFIED' | 'NEEDS_REVIEW';
-export type FollowupStatus = 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  | 'trainee_unavailable'
+  | 'trainer_unavailable'
+  | 'schedule_changed'
+  | 'material_issue'
+  | 'operational_issue'
+  | 'other';
+export type ObservationStatus = 'draft' | 'submitted';
+export type VerificationStatus = 'verified' | 'needs_review';
+export type FollowupStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
 export type FollowupTrigger =
-  | 'FAILED_ASSESSMENT'
-  | 'NEEDS_IMPROVEMENT'
-  | 'LOW_OBSERVATION_SCORE'
-  | 'MISSED_TRAINING'
-  | 'REASSESSMENT_REQUIRED'
-  | 'OTHER';
+  | 'failed_assessment'
+  | 'needs_improvement'
+  | 'low_observation_score'
+  | 'missed_training'
+  | 'reassessment_required'
+  | 'other';
 export type ProgressionRequirementType =
-  | 'REQUIRED_MATERIALS_COMPLETED'
-  | 'MIN_COMPETENCY_SCORE'
-  | 'MIN_ASSESSMENT_SCORE'
-  | 'FINAL_ASSESSMENT_REQUIRED'
-  | 'VERIFICATION_REQUIRED';
+  | 'required_materials_completed'
+  | 'min_competency_score'
+  | 'min_assessment_score'
+  | 'final_assessment_required'
+  | 'verification_required';
 
 interface Timestamped {
   created_at: string;
@@ -122,16 +118,19 @@ export interface Trainer extends Updatable {
   is_active: boolean;
 }
 
-export interface Teacher extends Updatable {
+export interface Trainee extends Updatable {
   id: string;
   profile_id: string | null;
   employee_code: string | null;
   branch: string | null;
   current_level_id: string | null;
   join_date: string | null;
-  status: 'ACTIVE' | 'INACTIVE' | 'GRADUATED';
+  status: TraineeStatus;
   notes: string | null;
 }
+
+// Backward-compatibility alias
+export type Teacher = Trainee;
 
 export interface TrainerTraineeAssignment extends Updatable {
   id: string;
@@ -291,12 +290,87 @@ export interface TraineeMaterialProgress {
 }
 
 // ---------------------------------------------------------------------------
-// Minimal Supabase `Database` generic. Table typing here is intentionally
-// loose (Row === Insert === Update) — swap in `supabase gen types` output
-// once the project is linked for full Insert/Update precision (defaults,
-// generated columns, etc).
+// Views
 // ---------------------------------------------------------------------------
+export interface VSessionMonitoring {
+  session_id: string;
+  training_plan_id: string | null;
+  trainer_id: string;
+  trainee_id: string;
+  trainee_code: string | null;
+  trainee_name: string;
+  material_id: string;
+  material_title: string;
+  planned_date: string;
+  actual_date: string | null;
+  status: SessionStatus;
+  delay_reason: DelayReason | null;
+  is_delayed: boolean;
+  delay_days: number;
+  is_overdue: boolean;
+  is_missed: boolean;
+}
+
+export interface VDelayedSession {
+  session_id: string;
+  training_plan_id: string | null;
+  trainer_id: string;
+  trainee_id: string;
+  trainee_code: string | null;
+  trainee_name: string;
+  material_id: string;
+  material_title: string;
+  planned_date: string;
+  actual_date: string | null;
+  status: SessionStatus;
+  delay_reason: DelayReason | null;
+  delay_days: number;
+}
+
+export interface VPendingVerification {
+  progress_id: string;
+  trainee_id: string;
+  trainee_code: string | null;
+  trainee_name: string;
+  material_id: string;
+  material_title: string;
+  trainer_id: string | null;
+  completed_at: string | null;
+}
+
+export interface VPendingFollowup {
+  followup_id: string;
+  trainee_id: string;
+  trainee_code: string | null;
+  trainee_name: string;
+  trainer_id: string;
+  material_id: string | null;
+  material_title: string | null;
+  action: string;
+  due_date: string | null;
+  status: FollowupStatus;
+  trigger_reason: FollowupTrigger;
+}
+
+export interface VTrainerDeliveryStats {
+  trainer_id: string;
+  trainer_name: string;
+  total_sessions: number;
+  completed_sessions: number;
+  delayed_sessions: number;
+  missed_sessions: number;
+}
+
+export interface VTrainerFollowupStats {
+  trainer_id: string;
+  trainer_name: string;
+  total_followups: number;
+  completed_followups: number;
+  overdue_followups: number;
+}
+
 type Table<T> = { Row: T; Insert: Partial<T>; Update: Partial<T> };
+type View<T> = { Row: T };
 
 export interface Database {
   public: {
@@ -310,7 +384,8 @@ export interface Database {
       competencies: Table<Competency>;
       material_competencies: Table<MaterialCompetency>;
       trainers: Table<Trainer>;
-      teachers: Table<Teacher>;
+      trainees: Table<Trainee>;
+      teachers: Table<Trainee>; // Alias for safety during refactor
       trainer_trainee_assignments: Table<TrainerTraineeAssignment>;
       training_plans: Table<TrainingPlan>;
       training_sessions: Table<TrainingSession>;
@@ -326,6 +401,52 @@ export interface Database {
       progression_rules: Table<ProgressionRule>;
       progression_requirements: Table<ProgressionRequirement>;
       trainee_material_progress: Table<TraineeMaterialProgress>;
+    };
+    Views: {
+      v_session_monitoring: View<VSessionMonitoring>;
+      v_delayed_sessions: View<VDelayedSession>;
+      v_missed_sessions: View<VDelayedSession>;
+      v_overdue_sessions: View<VDelayedSession>;
+      v_pending_verification: View<VPendingVerification>;
+      v_pending_followups: View<VPendingFollowup>;
+      v_trainer_delivery_stats: View<VTrainerDeliveryStats>;
+      v_trainer_followup_stats: View<VTrainerFollowupStats>;
+    };
+    Functions: {
+      admin_set_user_role: {
+        Args: {
+          p_profile_id: string;
+          p_role: UserRole;
+          [key: string]: unknown;
+        };
+        Returns: void;
+      };
+      current_role_name: {
+        Args: Record<string, never>;
+        Returns: UserRole;
+      };
+      current_trainer_id: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      current_trainee_id: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      is_my_trainee: {
+        Args: {
+          p_trainee_id: string;
+          [key: string]: unknown;
+        };
+        Returns: boolean;
+      };
+      is_historical_trainee: {
+        Args: {
+          p_trainee_id: string;
+          [key: string]: unknown;
+        };
+        Returns: boolean;
+      };
     };
   };
 }

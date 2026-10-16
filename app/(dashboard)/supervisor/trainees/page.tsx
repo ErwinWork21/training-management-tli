@@ -3,16 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
 export default async function SupervisorTraineesPage() {
   await requireRole(['supervisor', 'admin']);
   const supabase = await createClient();
 
-  // Fetch all trainees (teachers)
+  // Fetch all trainees
   const { data: trainees, error } = await supabase
-    .from('teachers')
+    .from('trainees')
     .select(`
       id,
       employee_code,
@@ -59,7 +57,7 @@ export default async function SupervisorTraineesPage() {
                   <TableCell>{t.profiles?.email}</TableCell>
                   <TableCell>{t.levels?.name ?? 'Unassigned'}</TableCell>
                   <TableCell>
-                    <Badge variant={t.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                    <Badge variant={t.status === 'active' ? 'default' : 'secondary'}>
                       {t.status}
                     </Badge>
                   </TableCell>

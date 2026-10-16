@@ -17,15 +17,15 @@ export default async function SupervisorAssignmentsPage() {
       status,
       start_date,
       trainers ( id, profiles:profile_id ( full_name ) ),
-      teachers ( id, profiles:profile_id ( full_name ) )
+      trainees ( id, profiles:profile_id ( full_name ) )
     `)
-    .eq('status', 'ACTIVE')
+    .eq('status', 'active')
     .order('start_date', { ascending: false });
 
   // Fetch trainers and trainees for the dropdowns
   const [trainersRes, traineesRes] = await Promise.all([
     supabase.from('trainers').select('id, profiles:profile_id ( full_name )').eq('is_active', true),
-    supabase.from('teachers').select('id, profiles:profile_id ( full_name )').eq('status', 'ACTIVE'),
+    supabase.from('trainees').select('id, profiles:profile_id ( full_name )').eq('status', 'active'),
   ]);
 
   return (
@@ -70,7 +70,7 @@ export default async function SupervisorAssignmentsPage() {
                     {a.trainers?.profiles?.full_name ?? 'Unknown Trainer'}
                   </TableCell>
                   <TableCell>
-                    {a.teachers?.profiles?.full_name ?? 'Unknown Trainee'}
+                    {a.trainees?.profiles?.full_name ?? 'Unknown Trainee'}
                   </TableCell>
                   <TableCell>{a.start_date}</TableCell>
                   <TableCell>

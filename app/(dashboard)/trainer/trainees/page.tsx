@@ -25,7 +25,7 @@ export default async function TrainerTraineesPage() {
     .select(`
       id,
       start_date,
-      teachers (
+      trainees (
         id,
         employee_code,
         status,
@@ -34,7 +34,7 @@ export default async function TrainerTraineesPage() {
       )
     `)
     .eq('trainer_id', trainerId)
-    .eq('status', 'ACTIVE')
+    .eq('status', 'active')
     .order('start_date', { ascending: false });
 
   return (
@@ -65,19 +65,19 @@ export default async function TrainerTraineesPage() {
               {assignments?.map((a: any) => (
                 <TableRow key={a.id}>
                   <TableCell>
-                    <div className="font-medium">{a.teachers?.profiles?.full_name ?? 'Unknown'}</div>
-                    <div className="text-xs text-muted-foreground">{a.teachers?.employee_code ?? a.teachers?.id.split('-')[0]}</div>
+                    <div className="font-medium">{a.trainees?.profiles?.full_name ?? 'Unknown'}</div>
+                    <div className="text-xs text-muted-foreground">{a.trainees?.employee_code ?? a.trainees?.id.split('-')[0]}</div>
                   </TableCell>
-                  <TableCell>{a.teachers?.levels?.name ?? 'Unassigned'}</TableCell>
+                  <TableCell>{a.trainees?.levels?.name ?? 'Unassigned'}</TableCell>
                   <TableCell>{a.start_date}</TableCell>
                   <TableCell>
-                    <Badge variant={a.teachers?.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                      {a.teachers?.status}
+                    <Badge variant={a.trainees?.status === 'active' ? 'default' : 'secondary'}>
+                      {a.trainees?.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/trainer/trainees/${a.teachers?.id}`}>View Progress</Link>
+                      <Link href={`/trainer/trainees/${a.trainees?.id}`}>View Progress</Link>
                     </Button>
                   </TableCell>
                 </TableRow>

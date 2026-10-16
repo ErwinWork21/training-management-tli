@@ -1,7 +1,6 @@
 import { requireRole } from '@/lib/auth/get-user-role';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -10,13 +9,13 @@ export default async function TraineeMaterialsPage() {
   const profile = await requireRole(['trainee', 'admin']);
   const supabase = await createClient();
 
-  const { data: teacher } = await supabase
-    .from('teachers')
+  const { data: trainee } = await supabase
+    .from('trainees')
     .select('id')
     .eq('profile_id', profile.id)
     .single();
 
-  const traineeId = (teacher as any)?.id ?? '';
+  const traineeId = (trainee as any)?.id ?? '';
 
   // Get active sessions
   const { data: sessions } = await supabase
@@ -28,7 +27,7 @@ export default async function TraineeMaterialsPage() {
       training_materials ( id, title, description, training_units ( name ) )
     `)
     .eq('trainee_id', traineeId)
-    .in('status', ['PLANNED', 'SCHEDULED', 'IN_PROGRESS'])
+    .in('status', ['planned'])
     .order('planned_date', { ascending: true });
 
   return (
@@ -60,11 +59,6 @@ export default async function TraineeMaterialsPage() {
                 <Button asChild variant="outline">
                   <Link href={`#`}>View Details & Requirements</Link>
                 </Button>
-                {/* 
-                  Future implementation: 
-                  If material has a quiz requirement, add a button to "Take Quiz".
-                  If checklist, add button to "Complete Checklist".
-                */}
               </div>
             </CardContent>
           </Card>

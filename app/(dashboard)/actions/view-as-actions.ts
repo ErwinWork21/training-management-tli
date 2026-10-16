@@ -58,11 +58,11 @@ export async function fetchUsersForRole(role: UserRole) {
   }
 
   if (role === 'trainee') {
-    const { data } = await supabase.from('teachers').select('profile_id, profiles:profile_id(full_name)');
+    const { data } = await supabase.from('trainees').select('profile_id, profiles:profile_id(full_name)');
     return (data || []).map((t: any) => ({
       id: t.profile_id,
       full_name: t.profiles?.full_name || 'Unknown Trainee',
-    })).filter(t => t.id); // Some teachers might not have profile_ids set up
+    })).filter(t => t.id);
   }
 
   return [];

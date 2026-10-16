@@ -29,7 +29,7 @@ export default async function TrainerOverviewPage() {
       .select('id, planned_date, status, material_id, trainee_id')
       .eq('trainer_id', trainerId)
       .gt('planned_date', new Date().toISOString().slice(0, 10))
-      .in('status', ['PLANNED', 'SCHEDULED'])
+      .in('status', ['planned'])
       .order('planned_date', { ascending: true })
       .limit(10),
     supabase.from('v_overdue_sessions').select('*').eq('trainer_id', trainerId),
