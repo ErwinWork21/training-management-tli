@@ -18,18 +18,18 @@ export async function createAssignment(formData: FormData) {
   // 1. Mark existing active assignments for this trainee as ended
   await (supabase.from('trainer_trainee_assignments') as any)
     .update({ 
-      status: 'ENDED', 
+      status: 'ended', 
       end_date: new Date().toISOString().slice(0, 10) 
     })
     .eq('trainee_id', traineeId)
-    .eq('status', 'ACTIVE');
+    .eq('status', 'active');
 
   // 2. Insert new assignment
   const { error } = await (supabase.from('trainer_trainee_assignments') as any)
     .insert({
       trainer_id: trainerId,
       trainee_id: traineeId,
-      status: 'ACTIVE',
+      status: 'active',
       start_date: new Date().toISOString().slice(0, 10),
     });
 

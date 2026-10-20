@@ -19,15 +19,15 @@ export default async function NewSessionPage() {
   const { data: assignments } = await supabase
     .from('trainer_trainee_assignments')
     .select(`
-      teachers (
+      trainees (
         id,
         profiles:profile_id ( full_name )
       )
     `)
     .eq('trainer_id', trainerId)
-    .eq('status', 'ACTIVE');
+    .eq('status', 'active');
   
-  const trainees = (assignments || []).map((a: any) => a.teachers);
+  const trainees = (assignments || []).map((a: any) => a.trainees);
 
   // Fetch hierarchy
   const [levelsRes, tracksRes, unitsRes, materialsRes] = await Promise.all([

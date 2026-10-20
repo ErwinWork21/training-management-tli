@@ -7,13 +7,13 @@ export default async function TraineeOverviewPage() {
   const profile = await requireRole(['trainee', 'admin']);
   const supabase = await createClient();
 
-  const { data: teacher } = await supabase
-    .from('teachers')
+  const { data: trainee } = await supabase
+    .from('trainees')
     .select('id, current_level_id, levels:current_level_id (name)')
     .eq('profile_id', profile.id)
     .single();
 
-  const traineeId = (teacher as any)?.id ?? '';
+  const traineeId = (trainee as any)?.id ?? '';
 
   const { data: progress } = await supabase
     .from('trainee_material_progress')
@@ -25,7 +25,7 @@ export default async function TraineeOverviewPage() {
     .from('trainer_trainee_assignments')
     .select('trainers ( id, profiles:profile_id ( full_name ) )')
     .eq('trainee_id', traineeId)
-    .eq('status', 'ACTIVE')
+    .eq('status', 'active')
     .single();
     
   const activeTrainerName = (assignment as any)?.trainers?.profiles?.full_name ?? 'None assigned';
@@ -35,7 +35,7 @@ export default async function TraineeOverviewPage() {
     .from('training_sessions')
     .select('id, planned_date, status, training_materials:material_id (title)')
     .eq('trainee_id', traineeId)
-    .in('status', ['PLANNED', 'SCHEDULED'])
+    .in('status', ['planned'])
     .order('planned_date', { ascending: true })
     .limit(5);
 
@@ -44,7 +44,7 @@ export default async function TraineeOverviewPage() {
       <div>
         <h1 className="text-xl font-semibold">My Progress</h1>
         <p className="text-sm text-muted-foreground mb-4">
-          Current level: {(teacher as unknown as { levels?: { name?: string } })?.levels?.name ?? '—'} <br/>
+          Current level: {(trainee as unknown as { levels?: { name?: string } })?.levels?.name ?? '—'} <br/>
           Assigned Trainer: <span className="font-medium text-foreground">{activeTrainerName}</span>
         </p>
       </div>

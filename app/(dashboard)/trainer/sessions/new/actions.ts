@@ -43,7 +43,7 @@ export async function createSessionPlan(formData: FormData) {
       trainee_id: traineeId,
       material_id: materialId,
       planned_date: plannedDate,
-      status: 'PLANNED',
+      status: 'planned',
       notes: notes
     });
 

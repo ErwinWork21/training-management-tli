@@ -1,7 +1,6 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -10,11 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 function SignupForm() {
-  const router = useRouter();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('trainee');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -25,14 +22,8 @@ function SignupForm() {
     setError(null);
 
     // Validation
-    if (!email || !password || !fullName || !role) {
+    if (!email || !password || !fullName) {
       setError('All fields are required.');
-      setLoading(false);
-      return;
-    }
-
-    if (!['supervisor', 'trainer', 'trainee'].includes(role)) {
-      setError('Invalid role selected.');
       setLoading(false);
       return;
     }
@@ -44,7 +35,6 @@ function SignupForm() {
       options: {
         data: {
           full_name: fullName,
-          role: role,
         },
       },
     });
@@ -64,7 +54,7 @@ function SignupForm() {
       <div className="space-y-4 text-center">
         <div className="p-4 bg-green-50 text-green-700 rounded-md">
           <p className="font-medium">Registration successful!</p>
-          <p className="text-sm mt-1">Your account has been created.</p>
+          <p className="text-sm mt-1">Your trainee account has been created.</p>
         </div>
         <Button className="w-full" asChild>
           <Link href="/login">Go to login</Link>
@@ -108,20 +98,6 @@ function SignupForm() {
           minLength={6}
         />
       </div>
-      <div className="space-y-1.5 flex flex-col">
-        <Label htmlFor="role">Role</Label>
-        <select
-          id="role"
-          required
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="trainee">Trainee</option>
-          <option value="trainer">Trainer</option>
-          <option value="supervisor">Supervisor</option>
-        </select>
-      </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Signing up…' : 'Sign up'}
@@ -142,7 +118,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-lg">The Lab — Sign Up</CardTitle>
-          <p className="text-sm text-muted-foreground">Create a new account</p>
+          <p className="text-sm text-muted-foreground">Create a new trainee account</p>
         </CardHeader>
         <CardContent>
           <Suspense fallback={<div className="text-sm text-muted-foreground">Loading form...</div>}>
