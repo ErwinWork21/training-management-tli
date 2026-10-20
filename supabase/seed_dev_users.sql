@@ -15,6 +15,9 @@ declare
   v_kinder_id uuid;
   v_trainer_entity_id uuid;
   v_trainee_entity_id uuid;
+
+  v_trainee_status text;
+  v_assign_status  text;
 begin
   -- 1. Create or update auth.users
   -- ADMIN
@@ -104,6 +107,18 @@ begin
   update public.profiles set role = 'trainee', full_name = 'Salwa Trainee' where id = v_tne_id;
 
   -- 3. Provision entity rows
+  select enumlabel into v_trainee_status
+  from pg_type t join pg_enum e on e.enumtypid = t.oid
+  where t.typname = 'trainee_status' and lower(e.enumlabel) = 'active'
+  order by case when e.enumlabel = 'active' then 1 else 2 end limit 1;
+  if v_trainee_status is null then v_trainee_status := 'active'; end if;
+
+  select enumlabel into v_assign_status
+  from pg_type t join pg_enum e on e.enumtypid = t.oid
+  where t.typname = 'assignment_status' and lower(e.enumlabel) = 'active'
+  order by case when e.enumlabel = 'active' then 1 else 2 end limit 1;
+  if v_assign_status is null then v_assign_status := 'active'; end if;
+
   insert into public.trainers (profile_id, employee_code, bio)
   values (v_trn_id, 'TRN-001', 'Experienced Master Trainer')
   on conflict (profile_id) do update set employee_code = excluded.employee_code
@@ -111,14 +126,19 @@ begin
 
   select id into v_kinder_id from public.levels where code = 'KINDER';
 
-  insert into public.trainees (profile_id, employee_code, branch, current_level_id, join_date, status)
-  values (v_tne_id, 'TNE-001', 'Jakarta Barat', v_kinder_id, current_date, 'active')
-  on conflict (profile_id) do update set employee_code = excluded.employee_code
-  returning id into v_trainee_entity_id;
+  execute '
+    insert into public.trainees (profile_id, employee_code, branch, current_level_id, join_date, status)
+    values ($1, ''TNE-001'', ''Jakarta Barat'', $2, current_date, cast($3 as trainee_status))
+    on conflict (profile_id) do update set employee_code = excluded.employee_code
+    returning id'
+  into v_trainee_entity_id
+  using v_tne_id, v_kinder_id, v_trainee_status;
 
   -- 4. Active trainer - trainee assignment
-  insert into public.trainer_trainee_assignments (trainer_id, trainee_id, start_date, status, notes)
-  values (v_trainer_entity_id, v_trainee_entity_id, current_date, 'active', 'Initial onboarding assignment')
-  on conflict do nothing;
+  execute '
+    insert into public.trainer_trainee_assignments (trainer_id, trainee_id, start_date, status, notes)
+    values ($1, $2, current_date, cast($3 as assignment_status), ''Initial onboarding assignment'')
+    on conflict do nothing'
+  using v_trainer_entity_id, v_trainee_entity_id, v_assign_status;
 
 end $$;

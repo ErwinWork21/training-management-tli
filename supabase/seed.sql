@@ -22,7 +22,40 @@ declare
   v_quiz_id   uuid;
   v_q1_id     uuid;
   v_q2_id     uuid;
+
+  v_req_obs   text;
+  v_req_ca    text;
+  v_req_qz    text;
 begin
+  -- --------------------------------------------------------------------------
+  -- Detect requirement_type enum labels (supports lowercase and legacy uppercase)
+  -- --------------------------------------------------------------------------
+  select enumlabel into v_req_obs
+  from pg_type t
+  join pg_enum e on e.enumtypid = t.oid
+  where t.typname = 'requirement_type' and lower(e.enumlabel) = 'observation'
+  order by case when e.enumlabel = 'observation' then 1 else 2 end
+  limit 1;
+
+  select enumlabel into v_req_ca
+  from pg_type t
+  join pg_enum e on e.enumtypid = t.oid
+  where t.typname = 'requirement_type' and lower(e.enumlabel) = 'competency_assessment'
+  order by case when e.enumlabel = 'competency_assessment' then 1 else 2 end
+  limit 1;
+
+  select enumlabel into v_req_qz
+  from pg_type t
+  join pg_enum e on e.enumtypid = t.oid
+  where t.typname = 'requirement_type' and lower(e.enumlabel) = 'quiz'
+  order by case when e.enumlabel = 'quiz' then 1 else 2 end
+  limit 1;
+
+  -- Fallbacks if pg_enum query returned nothing
+  if v_req_obs is null then v_req_obs := 'observation'; end if;
+  if v_req_ca is null then v_req_ca := 'competency_assessment'; end if;
+  if v_req_qz is null then v_req_qz := 'quiz'; end if;
+
   -- --------------------------------------------------------------------------
   -- 1. Levels (Kinder, Junior, Coder)
   -- --------------------------------------------------------------------------
@@ -156,13 +189,15 @@ begin
   -- 4. Sample Material Requirements & Competencies (Attached to first material)
   -- --------------------------------------------------------------------------
   if v_first_mat_id is not null then
-    -- Requirements: Observation, Competency Assessment, Quiz
-    insert into public.material_requirements (material_id, requirement_type, is_mandatory, min_score, notes)
-    values
-      (v_first_mat_id, 'observation', true, 70.00, 'Trainer classroom observation (min 70%)'),
-      (v_first_mat_id, 'competency_assessment', true, 75.00, 'Assessment across linked core competencies (min 75%)'),
-      (v_first_mat_id, 'quiz', true, 80.00, 'Material understanding quiz (min 80%)')
-    on conflict (material_id, requirement_type) do nothing;
+    -- Requirements: Observation, Competency Assessment, Quiz (dynamically supports lowercase/uppercase enum)
+    execute '
+      insert into public.material_requirements (material_id, requirement_type, is_mandatory, min_score, notes)
+      values
+        ($1, cast($2 as requirement_type), true, 70.00, ''Trainer classroom observation (min 70%)''),
+        ($1, cast($3 as requirement_type), true, 75.00, ''Assessment across linked core competencies (min 75%)''),
+        ($1, cast($4 as requirement_type), true, 80.00, ''Material understanding quiz (min 80%)'')
+      on conflict (material_id, requirement_type) do nothing'
+    using v_first_mat_id, v_req_obs, v_req_ca, v_req_qz;
 
     -- Link competencies to this material
     insert into public.material_competencies (material_id, competency_id)
